@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const { getDocumentContent } = require('./controllers/googleAuth');
-const { sendMessageToChatGPT } = require('./controllers/chatGPT');
+const { analyzeText, validateSummary, findKeywords } = require('./controllers/chatGPT');
 
 const app = express();
 app.use(bodyParser.json());
@@ -14,29 +14,25 @@ app.post('/document', async (req, res) => {
     const documentId = req.body.id;
     const options = req.body.options;
 
-    // Verifica se options foi fornecido e se pelo menos uma opção é verdadeira
-    if (!options || !Object.values(options).some(value => value)) {
-      res.status(400).send({ message: 'Você deve selecionar pelo menos uma opção de revisão.' });
-      return;
-    }
-
     const content = await getDocumentContent(documentId);
-    let generatedText = null;
-    let foundKeywords = null;
+    let summary = null;
+    let keywords = null;
+    let analysis = null;
+    
+    analysis = await analyzeText(content);
 
-    if (options.generateSummary) {
-      generatedText = await sendMessageToChatGPT(content);
+    if (options.validateSummary) {
+      summary = await validateSummary(content);
     }
 
     if (options.findKeywords) {
-      // Implemente a lógica para encontrar as palavras-chave no conteúdo aqui.
-      // Por exemplo, você pode utilizar alguma biblioteca ou algoritmo para isso.
-      foundKeywords = findKeywords(content);
+      keywords = await findKeywords(content);
     }
 
     const responseObj = {
-      generatedText: generatedText,
-      foundKeywords: foundKeywords,
+      analysis: analysis,
+      summary: summary,
+      keywords: keywords,
     };
 
     res.send(responseObj);
