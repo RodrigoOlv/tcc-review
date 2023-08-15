@@ -2,8 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
-const { getDocumentContent } = require('./controllers/googleAuth');
+const { getDocumentContent, extractGoogleDocsId } = require('./controllers/google');
 const { analyzeText, validateSummary, findKeywords } = require('./controllers/chatGPT');
+const { checkReferences } = require('./referenceValidator');
 
 const app = express();
 app.use(bodyParser.json());
@@ -11,13 +12,15 @@ app.use(cors());
 
 app.post('/document', async (req, res) => {
   try {
-    const documentId = req.body.id;
+    const url = req.body.url;
+    const documentId = extractGoogleDocsId(url);
     const options = req.body.options;
 
     const content = await getDocumentContent(documentId);
     let summary = null;
     let keywords = null;
     let analysis = null;
+    let missingReferences = null;
     
     analysis = await analyzeText(content);
 
@@ -29,10 +32,15 @@ app.post('/document', async (req, res) => {
       keywords = await findKeywords(content);
     }
 
+    if (options.checkReferences) {
+      missingReferences = checkReferences(content); // Use a função do arquivo separado
+    }
+
     const responseObj = {
       analysis: analysis,
       summary: summary,
       keywords: keywords,
+      missingReferences: missingReferences
     };
 
     res.send(responseObj);

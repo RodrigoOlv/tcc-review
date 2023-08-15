@@ -3,12 +3,15 @@ require('dotenv').config();
 
 const analyzeText = async (message) => {
   try {
-    const apiUrl = 'https://api.openai.com/v1/completions';
+    const apiUrl = 'https://api.openai.com/v1/chat/completions';
     const apiKey = process.env.OPENAI_API_KEY;
 
     const response = await axios.post(apiUrl, {
-      model: 'text-davinci-003',
-      prompt: `Analise a linguagem, estrutura e conteúdo do seguinte texto: ${message}`,
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant that analyzes text.' },
+        { role: 'user', content: `Analise a linguagem, estrutura e conteúdo do seguinte texto: ${message}` }
+      ],
+      model: 'gpt-3.5-turbo',
       temperature: 0.5,
       max_tokens: 400,
     }, {
@@ -18,7 +21,7 @@ const analyzeText = async (message) => {
       },
     });
 
-    return response.data.choices[0].text;
+    return response.data.choices[0].message.content;
   } catch (error) {
     console.log('Erro ao realizar a análise de texto:', error);
     throw error;
@@ -27,12 +30,15 @@ const analyzeText = async (message) => {
 
 const validateSummary = async (message) => {
   try {
-    const apiUrl = 'https://api.openai.com/v1/completions';
+    const apiUrl = 'https://api.openai.com/v1/chat/completions';
     const apiKey = process.env.OPENAI_API_KEY;
 
     const response = await axios.post(apiUrl, {
-      model: 'text-davinci-003',
-      prompt: `Verifique se a seção resumo foi preenchida e está alinhada com os tópicos discutidos no restante do artigo: ${message}`,
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant that validates summaries.' },
+        { role: 'user', content: `Verifique se a seção resumo foi preenchida e está alinhada com os tópicos discutidos no restante do artigo: ${message}` }
+      ],
+      model: 'gpt-3.5-turbo',
       temperature: 0.5,
       max_tokens: 400,
     }, {
@@ -42,7 +48,7 @@ const validateSummary = async (message) => {
       },
     });
 
-    return response.data.choices[0].text;
+    return response.data.choices[0].message.content;
   } catch (error) {
     console.log('Erro ao realizar a análise de resumo:', error);
     throw error;
@@ -51,12 +57,15 @@ const validateSummary = async (message) => {
 
 const findKeywords = async (message) => {
   try {
-    const apiUrl = 'https://api.openai.com/v1/completions';
+    const apiUrl = 'https://api.openai.com/v1/chat/completions';
     const apiKey = process.env.OPENAI_API_KEY;
 
     const response = await axios.post(apiUrl, {
-      model: 'text-davinci-003',
-      prompt: `Identifique os seis termos relevantes com maior ocorrência no seguinte texto: ${message}`,
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant that identifies keywords.' },
+        { role: 'user', content: `Identifique os seis termos relevantes com maior ocorrência no seguinte texto: ${message}` }
+      ],
+      model: 'gpt-3.5-turbo',
       temperature: 0.5,
       max_tokens: 50,
     }, {
@@ -66,7 +75,7 @@ const findKeywords = async (message) => {
       },
     });
 
-    return response.data.choices[0].text;
+    return response.data.choices[0].message.content;
   } catch (error) {
     console.log('Erro ao realizar a análise de palavras chave:', error);
     throw error;
