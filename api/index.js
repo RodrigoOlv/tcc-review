@@ -4,7 +4,7 @@ const cors = require('cors');
 
 const { getDocumentContent, extractGoogleDocsId } = require('./controllers/google');
 const { analyzeText, validateSummary, findKeywords } = require('./controllers/chatGPT');
-const { checkReferences } = require('./referenceValidator');
+const { validateReferences } = require('./referenceValidator'); // Importe a função
 
 const app = express();
 app.use(bodyParser.json());
@@ -21,7 +21,7 @@ app.post('/document', async (req, res) => {
     let keywords = null;
     let analysis = null;
     let missingReferences = null;
-    
+
     analysis = await analyzeText(content);
 
     if (options.validateSummary) {
@@ -33,14 +33,14 @@ app.post('/document', async (req, res) => {
     }
 
     if (options.checkReferences) {
-      missingReferences = checkReferences(content); // Use a função do arquivo separado
+      missingReferences = validateReferences(content); // Use a função do arquivo separado
     }
 
     const responseObj = {
       analysis: analysis,
       summary: summary,
       keywords: keywords,
-      missingReferences: missingReferences
+      missingReferences: missingReferences,
     };
 
     res.send(responseObj);
@@ -49,7 +49,6 @@ app.post('/document', async (req, res) => {
     res.status(500).send(err);
   }
 });
-
 
 const port = 3000;
 app.listen(port, () => {
