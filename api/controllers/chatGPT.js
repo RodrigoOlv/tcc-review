@@ -47,9 +47,9 @@ const analyzeText = async (message) => {
     const getConversationContext = (partIndex) => {
       const context = [
         { role: 'system', content: 'Você é um assistente útil que analisa texto.' },
-        { role: 'user', content: 'Início do texto a ser analisado (se não puder analisar, envie uma mensagem em branco):' },
+        { role: 'user', content: 'Faça uma breve análise do texto quanto ao conteúdo, ignore quaisquer partes que não possam ser analisadas. O texto precisará ser enviado em partes, portanto, tente trabalhá-lo como um documento contínuo.' },
         { role: 'user', content: `[Parte ${partIndex + 1}] ${parts[partIndex]}` },
-        { role: 'user', content: 'Continuação da análise:' },
+        { role: 'user', content: partIndex === parts.length - 1 ? 'Está é a última parte do texto' : 'Continuação da análise:' },
       ];
 
       return context;
@@ -63,7 +63,7 @@ const analyzeText = async (message) => {
         messages: conversationContext,
         model: 'gpt-3.5-turbo',
         temperature: 0.5,
-        max_tokens: 2000,
+        max_tokens: 4000,
       }, {
         headers: {
           'Content-Type': 'application/json',
